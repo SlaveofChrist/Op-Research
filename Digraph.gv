@@ -1,0 +1,16 @@
+digraph {
+	v
+	s
+	u
+	t
+	v -> t [label=5]
+	v -> s [label=-2 color=red]
+	v -> u [label=-3 color=red]
+	s -> u [label=4]
+	s -> v [label=2]
+	u -> v [label=3]
+	u -> t [label=1]
+	u -> s [label=-4 color=red]
+	t -> u [label=-1 color=red]
+	t -> v [label=-5 color=red]
+}

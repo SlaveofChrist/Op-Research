@@ -1,5 +1,6 @@
 from graph import Graph
 from collections import deque
+import graphviz
 
 def buildResidualGraphAndFlow(flow, G):
 	"""
@@ -29,67 +30,80 @@ def buildResidualGraphAndFlow(flow, G):
 def edmondsKarpAlgorithm(initial_graph):
 	"""
 	This is the implementation of edmondsKaroAlgorithm.
-	This the link for seeing the pseudo-code : https://fr.wikipedia.org/wiki/Algorithme_d%27Edmonds-Karp
+	This is the link for seeing the pseudo-code : https://fr.wikipedia.org/wiki/Algorithme_d%27Edmonds-Karp
 	:param initial_graph:
 	:param residual_graph:
 	:return:
 	"""
-	s = initial_graph.get_vertex("s")
-	t = initial_graph.get_vertex("t")
+	s = initial_graph.get_vertex("s").value()
+	t = initial_graph.get_vertex("t").value()
 	initial_graph_edges = initial_graph.edges()
 	# residual_graph_edges = residual_graph.edges()
-
-	capacities_dict = {}
-	residual_capacities_dict = {}
-
-	for e in initial_graph_edges:
-		capacities_dict[e[0]] = {}
-		residual_capacities_dict[e[0]] = {}
-
-	# for e in residual_graph.edges():
+	n_vertices = len(initial_graph.vertices())
+	capacities_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
+	flow_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
+	#residual_graph = {}
 
 	for e in initial_graph_edges:
-		capacities_dict[e[0]][e[1]] = e[2]
-		residual_capacities_dict[e[0]][e[1]] = 0
+		orig = e[0].value()
+		dest = e[1].value()
+		capacities_matrix[orig][dest] = e[2]
+		# residual_graph[e[0]][e[1]] = e[2]
+		flow_matrix[e[0].value()][e[1].value()] = 0
 
-	# for e in residual_graph_edges:
 	f = 0
 	while True:
-		max_flow, parents_dict = bfs(initial_graph,s,t,capacities_dict, residual_capacities_dict)
+		max_flow, parents_dict = bfs(s,t,capacities_matrix, flow_matrix)
 		if max_flow == 0:
 			break
 		f += max_flow
 		v = t
 		while v != s:
 			u = parents_dict[v]
-			residual_capacities_dict[u][v] += max_flow
-			if v not in residual_capacities_dict.keys():
-				residual_capacities_dict[v] = {}
-				residual_capacities_dict[v][u] = 0
-			if residual_capacities_dict[v].get(u) is None:
-				residual_capacities_dict[v][u] = 0
-			residual_capacities_dict[v][u] -= max_flow
+			flow_matrix[u][v] += max_flow
+			flow_matrix[v][u] -= max_flow
 			v = u
-	return f,residual_capacities_dict
-def bfs(initial_graph,s,t, capacities_dict, residual_capacities_dict):
-	parents_dict = {}
-	maximal_flow = {}
-	for v in initial_graph.vertices():
-		parents_dict[v] = None
-		maximal_flow[v] = 10000000000
+	return f,flow_matrix
+
+def bfs(s,t,capacities_matrix, flow_matrix):
+	s
+	n = len(capacities_matrix)
+	parents = [-1] * n
+	maximal_flow = [-1] * n
+	for v in range(n):
+		parents[v] = -1
+		maximal_flow[v] = float("inf")
+
+	parents[s] = -2
+
 	queue = deque([])
 	queue.append(s)
+
 	while len(queue):
 		u = queue.popleft()
-		for v in initial_graph.adjacents(u):
-			if capacities_dict[u][v] - residual_capacities_dict[u][v] > 0 and parents_dict[v] is None:
-				parents_dict[v] = u
-				maximal_flow[v] = min([maximal_flow[u], capacities_dict[u][v] - residual_capacities_dict[u][v] ])
+		for v in range(n):
+			if capacities_matrix[u][v] - flow_matrix[u][v] > 0 and parents[v] == -1:
+				parents[v] = u
+				maximal_flow[v] = min(maximal_flow[u], capacities_matrix[u][v] - flow_matrix[u][v])
 				if v != t:
 					queue.append(v)
 				else:
-					return maximal_flow[t],parents_dict
-	return 0,parents_dict
+					return maximal_flow[t],parents
+	return 0,parents
+
+def visualizeAGraph(residual_graph):
+	color_edge_red = {'color': 'red'}
+	graph = graphviz.Digraph()
+	for key in residual_graph.keys():
+		graph.node(key.tag())
+	for key,val in residual_graph.items():
+		for key1,val2 in val.items():
+			if val2 > 0:
+				graph.edge(key.tag(),key1.tag(),str(val2))
+			else:
+				graph.edge(key.tag(), key1.tag(), str(val2),**color_edge_red)
+	graph.render()
+# def visualizeAGraph2(residual_graph):
 
 def main():
 	g_initial = Graph(True)
@@ -112,11 +126,22 @@ def main():
 	g_initial.insert_edge(d, e, 2)
 	g_initial.insert_edge(d, f, 6)
 	g_initial.insert_edge(f, t, 9)
+	# s = g_initial.insert_vertex('s',0)
+	# u = g_initial.insert_vertex('u',1)
+	# v = g_initial.insert_vertex('v',2)
+	# t = g_initial.insert_vertex('t',3)
+	#
+	# g_initial.insert_edge(s,u,4)
+	# g_initial.insert_edge(s,v,2)
+	# g_initial.insert_edge(u,v,3)
+	# g_initial.insert_edge(u,t,1)
+	# g_initial.insert_edge(v,t,6)
 
 	flow,residual_graph = edmondsKarpAlgorithm(g_initial)
 
 	print(flow)
 	print(residual_graph)
+	#visualizeAGraph(residual_graph)
 
     # g_flow, residual_g = buildResidualGraphAndFlow(0, g_initial)
 

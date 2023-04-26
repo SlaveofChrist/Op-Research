@@ -13,7 +13,24 @@
 # g_initial.insert_edge(u,t,1)
 #
 # print(g_initial._outgoing.values())
-t = 2
-t +=1
+test = {}
+test['a'] = {}
+test['b'] = {}
+test ['c'] = {}
 
-print(t)
+test ['a']['d'] = 1
+test ['b']['e'] = 2
+test ['c']['f'] = 3
+
+cap = []
+cap[0][0] = 2
+
+
+# for k,v in test.items():
+#     for val1,val2 in v.items():
+#         print("la valeur de la cle {} est : {} qui contient lui même comme valeur : {} ".format(k,val1,val2))
+
+visited = {node : False for node in test}
+print(visited)
+print(min(float("Inf"),1))
+print(cap)

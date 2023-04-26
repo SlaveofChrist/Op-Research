@@ -74,15 +74,16 @@ class Graph:
         """
 	  Lightweight edge structure for a graph
 		"""
-        __slots__ = '_origin', '_destination', '_value'
+        __slots__ = '_origin', '_destination', '_value', '_cost'
 
-        def __init__(self, u, v, x):
+        def __init__(self, u, v, x, cost=0):
             """
 		  Do not call constructor directly. Use Graph's insert_edge(u,v,x)
 			"""
             self._origin = u
             self._destination = v
             self._value = x
+            self._cost = cost
 
         def endpoints(self):
             """
@@ -104,16 +105,22 @@ class Graph:
 			"""
             return self._value
 
+        def cost(self):
+            """
+            Return the cost associated with this edge
+            """
+            return self._cost
+
         def __hash__(self):
             return hash((self._origin, self._destination))
 
         def __repr__(self):
-            return '({0},{1}){2}'.format(self._origin, self._destination,
-                                         self._value if self._value is not None else "")
+            return '({0},{1}){2},{3}'.format(self._origin, self._destination,
+                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "")
 
         def __str__(self):
-            return '({0},{1}){2}'.format(self._origin, self._destination,
-                                         self._value if self._value is not None else "")
+            return '({0},{1}){2},{3}'.format(self._origin, self._destination,
+                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "")
 
         def __getitem__(self, index):
             """
@@ -128,6 +135,8 @@ class Graph:
                 return self._destination
             if index == 2:
                 return self._value
+            if index == 3:
+                return self._cost
 
         # ------------------ To make the edges comparable -----------------
         def __neg__(self):
