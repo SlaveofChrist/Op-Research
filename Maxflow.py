@@ -108,9 +108,11 @@ def visualizeAGraph(residual_graph):
 			else:
 				graph.edge(key.tag(), key1.tag(), str(val2),**color_edge_red)
 	graph.render()
-# def visualizeAGraph2(residual_graph):
-
-def parseInputFile():
+def recuperateFileFromInput():
+	"""
+	 this function aim to recuperate the graphviz file from input and extract the edges from this file
+	 in the list form
+	"""
 	try:
 		opts, args = getopt.getopt(sys.argv[1:], "i", ["input"])
 	except getopt.GetoptError as err:
@@ -127,13 +129,21 @@ def parseInputFile():
 		if tab_to_parse[i] == "":
 			break
 		edges.append(tab_to_parse[i].strip())
+	return edges
+
+def parseInputFile():
+	"""
+	This function parse the edges extracted to the structure of Graph Class oin the order to
+	use the algorithms which permit us to compute the maw flow with the minimal cost
+	"""
+	edges = recuperateFileFromInput()
 	pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\d+)<\/font>>\]'
 	regex_compile = re.compile(pattern)
 	edges_list = []
 	for s in edges:
-		resultat = re.search(pattern,s)
-		if resultat:
-			edges_list.append((resultat.group(1), resultat.group(2), resultat.group(3), resultat.group(4)))
+		result = regex_compile.search(s)
+		if result:
+			edges_list.append((result.group(1), result.group(2), result.group(3), result.group(4)))
 
 	return graphFromList(edges_list, True)
 
