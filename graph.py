@@ -284,7 +284,7 @@ class Graph:
 		"""
         if self.get_edge(u, v) is not None:
             raise ValueError('u and v are already adjacent')
-        e = self.Edge(u, v, x)
+        e = self.Edge(u, v, x,)
         self._outgoing[u][v] = e
         self._incoming[v][u] = e
 
@@ -320,7 +320,7 @@ def graph_from_edgelist(E, directed=False):
     for e in E:
         src = e[0]
         dest = e[1]
-        value = e[2] if len(e) > 2 else None
+        value = e[2]  if len(e) > 2 else None
         g.insert_edge(verts[src], verts[dest], value)
 
     return g

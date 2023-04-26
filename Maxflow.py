@@ -1,6 +1,11 @@
-from graph import Graph
+import graph
+from graph import Graph, graph_from_edgelist as graphFromList
 from collections import deque
 import graphviz
+import sys
+import getopt
+import re
+import os
 
 def buildResidualGraphAndFlow(flow, G):
 	"""
@@ -105,27 +110,56 @@ def visualizeAGraph(residual_graph):
 	graph.render()
 # def visualizeAGraph2(residual_graph):
 
-def main():
-	g_initial = Graph(True)
-	s = g_initial.insert_vertex("s", 0)
-	b = g_initial.insert_vertex("b", 1)
-	c = g_initial.insert_vertex("c", 2)
-	d = g_initial.insert_vertex("d", 3)
-	e = g_initial.insert_vertex("e", 4)
-	f = g_initial.insert_vertex("f", 5)
-	t = g_initial.insert_vertex("t", 6)
+def parseInputFile():
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "i", ["input"])
+	except getopt.GetoptError as err:
+		print(err)
+		print("Nom du programme <{-i | --input}> nom du fichier à lire ")
+		sys.exit(2)
+	if opts[0][0] == "-i":
+		with open(args[0],"r") as file_to_read:
+			input_to_parse = file_to_read.read()
 
-	g_initial.insert_edge(s, d, 3)
-	g_initial.insert_edge(s, b, 3)
-	g_initial.insert_edge(c, s, 3)
-	g_initial.insert_edge(c,d, 1)
-	g_initial.insert_edge(c, e, 2)
-	g_initial.insert_edge(b, c, 4)
-	g_initial.insert_edge(e, b, 1)
-	g_initial.insert_edge(e, t, 1)
-	g_initial.insert_edge(d, e, 2)
-	g_initial.insert_edge(d, f, 6)
-	g_initial.insert_edge(f, t, 9)
+		tab_to_parse = input_to_parse.split("\n")
+	edges = []
+	for i in range(5, len(tab_to_parse)):
+		if tab_to_parse[i] == "":
+			break
+		edges.append(tab_to_parse[i].strip())
+	pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\d+)<\/font>>\]'
+	regex_compile = re.compile(pattern)
+	edges_list = []
+	for s in edges:
+		resultat = re.search(pattern,s)
+		if resultat:
+			edges_list.append((resultat.group(1), resultat.group(2), resultat.group(3), resultat.group(4)))
+
+	return graphFromList(edges_list, True)
+
+
+def main():
+	 g_initial = parseInputFile()
+	 print(g_initial)
+	# s = g_initial.insert_vertex("s", 0)
+	# b = g_initial.insert_vertex("b", 1)
+	# c = g_initial.insert_vertex("c", 2)
+	# d = g_initial.insert_vertex("d", 3)
+	# e = g_initial.insert_vertex("e", 4)
+	# f = g_initial.insert_vertex("f", 5)
+	# t = g_initial.insert_vertex("t", 6)
+	#
+	# g_initial.insert_edge(s, d, 3)
+	# g_initial.insert_edge(s, b, 3)
+	# g_initial.insert_edge(c, s, 3)
+	# g_initial.insert_edge(c,d, 1)
+	# g_initial.insert_edge(c, e, 2)
+	# g_initial.insert_edge(b, c, 4)
+	# g_initial.insert_edge(e, b, 1)
+	# g_initial.insert_edge(e, t, 1)
+	# g_initial.insert_edge(d, e, 2)
+	# g_initial.insert_edge(d, f, 6)
+	# g_initial.insert_edge(f, t, 9)
 	# s = g_initial.insert_vertex('s',0)
 	# u = g_initial.insert_vertex('u',1)
 	# v = g_initial.insert_vertex('v',2)
@@ -137,10 +171,13 @@ def main():
 	# g_initial.insert_edge(u,t,1)
 	# g_initial.insert_edge(v,t,6)
 
-	flow,residual_graph = edmondsKarpAlgorithm(g_initial)
+	# flow,residual_graph = edmondsKarpAlgorithm(g_initial)
 
-	print(flow)
-	print(residual_graph)
+	# print(flow)
+
+
+
+
 	#visualizeAGraph(residual_graph)
 
     # g_flow, residual_g = buildResidualGraphAndFlow(0, g_initial)
