@@ -276,7 +276,7 @@ class Graph:
             self._incoming[v] = {}
         return v
 
-    def insert_edge(self, u, v, x=None):
+    def insert_edge(self, u, v, x=None, cost=None):
         """
 	  Insert and return a new Edge from u to v with value x.
 	  Raise a ValueError if u and v are not vertices of the graph.
@@ -284,13 +284,13 @@ class Graph:
 		"""
         if self.get_edge(u, v) is not None:
             raise ValueError('u and v are already adjacent')
-        e = self.Edge(u, v, x,)
+        e = self.Edge(u, v, x, cost)
         self._outgoing[u][v] = e
         self._incoming[v][u] = e
 
     def _print_edge(self, e):
-        return '{0} -{2}-{3} {1}'.format(e._origin, e._destination, e._value if e._value is not None else "",
-                                         ">" if self.is_directed() else "")
+        return '{0} -{2},{4}-{3} {1}'.format(e._origin, e._destination, e._value if e._value is not None else "",
+                                         ">" if self.is_directed() else "", e._cost if e._cost is not None else "" )
 
     def __str__(self):
         result = ""
@@ -314,13 +314,16 @@ def graph_from_edgelist(E, directed=False):
         V.add(e[1])
 
     verts = {}
+    i = 0
     for v in V:
-        verts[v] = g.insert_vertex(v)
+        verts[v] = g.insert_vertex(v,i)
+        i += 1
 
     for e in E:
         src = e[0]
         dest = e[1]
         value = e[2]  if len(e) > 2 else None
-        g.insert_edge(verts[src], verts[dest], value)
+        cost = e[3]
+        g.insert_edge(verts[src], verts[dest], value, cost)
 
     return g

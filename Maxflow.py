@@ -70,6 +70,36 @@ def edmondsKarpAlgorithm(initial_graph):
 			v = u
 	return f,flow_matrix
 
+def bellmanFordAlgorithm(g, s, t ):
+	"""
+	This function aim to find the shortest path using Bellman-Ford algorithm
+	:param graph:
+	:param s:
+	:param t:
+	:return: path : the shortest path
+	:return: dist[i] : the final distance of every node from s
+	"""
+
+	list_vertices = g.vertices()
+	n = len(list_vertices)
+	dist = [float('inf')] * n
+	dist[s.value()] = 0
+	parent = [-1] * n
+	for _ in range(n - 1):
+			for e in g.edges():
+				#pdb.set_trace()
+				if e.value() > 0 and dist[e.endpoints()[0].value()] + e.cost() < dist[e.endpoints()[1].value()]:
+					dist[e.endpoints()[1].value()] = dist[e.endpoints()[0].value()] + e.cost()
+					parent[e.endpoints()[1].value()] = e.endpoints()[0].value()
+
+	path = []
+	u = t.value()
+	while u != -1:
+		path.append(u)
+		u = parent[u]
+	path.reverse()
+
+	return path, dist[t.value()]
 def bfs(s,t,capacities_matrix, flow_matrix):
 	s
 	n = len(capacities_matrix)
@@ -143,14 +173,16 @@ def parseInputFile():
 	for s in edges:
 		result = regex_compile.search(s)
 		if result:
-			edges_list.append((result.group(1), result.group(2), result.group(3), result.group(4)))
+			edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
 
 	return graphFromList(edges_list, True)
 
-
 def main():
 	 g_initial = parseInputFile()
-	 print(g_initial)
+	 s = g_initial.get_vertex("s")
+	 t = g_initial.get_vertex("t")
+	 print(bellmanFordAlgorithm(g_initial,s,t))
+
 	# s = g_initial.insert_vertex("s", 0)
 	# b = g_initial.insert_vertex("b", 1)
 	# c = g_initial.insert_vertex("c", 2)

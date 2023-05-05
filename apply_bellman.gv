@@ -1,0 +1,21 @@
+digraph Gv2{
+              graph [nodesep="0.3", ranksep="0.3",fontsize=12]
+              node [shape=circle,fixedsize=true,width=.3,height=.3,fontsize=12]
+              edge [arrowsize=0.6]
+
+              s -> e [label = <<font color="green">40</font>,<font color="red">8</font>>]
+              s -> a [label = <<font color="green">15</font>,<font color="red">10</font>>]
+              e -> d [label = <<font color="green">8</font>,<font color="red">1</font>>]
+              d -> a [label = <<font color="green">5</font>,<font color="red">-4</font>>]
+              d -> c [label = <<font color="green">20</font>,<font color="red">-1</font>>]
+              a -> c [label = <<font color="green">4</font>,<font color="red">2</font>>]
+              c -> t [label = <<font color="green">10</font>,<font color="red">-2</font>>]
+              t -> a [label = <<font color="green">15</font>,<font color="red">1</font>>]
+
+              s [label="s",color=green]
+              e [label="e"]
+              a [label="a"]
+              d [label="d"]
+              c [label="c"]
+              t [label="t",color=blue]
+}
