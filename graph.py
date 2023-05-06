@@ -74,9 +74,9 @@ class Graph:
         """
 	  Lightweight edge structure for a graph
 		"""
-        __slots__ = '_origin', '_destination', '_value', '_cost'
+        __slots__ = '_origin', '_destination', '_value', '_cost', '_flow'
 
-        def __init__(self, u, v, x, cost=0):
+        def __init__(self, u, v, x, cost=0, flow=0):
             """
 		  Do not call constructor directly. Use Graph's insert_edge(u,v,x)
 			"""
@@ -84,6 +84,7 @@ class Graph:
             self._destination = v
             self._value = x
             self._cost = cost
+            self._flow = flow
 
         def endpoints(self):
             """
@@ -110,6 +111,11 @@ class Graph:
             Return the cost associated with this edge
             """
             return self._cost
+        def flow(self):
+            """
+            Return the flow associated with this edge
+            """
+            return self._flow
 
         def __hash__(self):
             return hash((self._origin, self._destination))
@@ -127,7 +133,6 @@ class Graph:
 			this function defines the behavior that we get when we type edge[index]
 			edge being an object of Edge class
 			:param index:
-			:return:
 			"""
             if index == 0:
                 return self._origin
@@ -137,6 +142,26 @@ class Graph:
                 return self._value
             if index == 3:
                 return self._cost
+            if index == 4:
+                return self._flow
+
+        def __setitem__(self, index, value):
+            """
+            this function defines the behavior that we get when we type edge[index]
+            edge being an object of Edge class
+            :param index:
+            """
+
+            if index == 0:
+                self._origin = value
+            if index == 1:
+                self._destination = value
+            if index == 2:
+                self._value = value
+            if index == 3:
+                self._cost = value
+            if index == 4:
+                self._flow = value
 
         # ------------------ To make the edges comparable -----------------
         def __neg__(self):
@@ -256,13 +281,13 @@ class Graph:
 		"""
         return self._outgoing[v].keys()
 
-    def incident_edges(self, v, outgoing=True):
+    def incident_edges(self, v):
         """
 	  Return all (outgoing) edges incident to vertex v in the graph.
 	  If graph is directed, optional parameter used to request incoming edges
 		"""
         self._validate_vertex(v)
-        adj = self._outgoing if outgoing else self._incoming
+        adj = self._outgoing
         for edge in adj[v].values():
             yield edge
 
@@ -285,7 +310,9 @@ class Graph:
         if self.get_edge(u, v) is not None:
             raise ValueError('u and v are already adjacent')
         e = self.Edge(u, v, x, cost)
+        e_i = self.Edge(v,u,0,cost)
         self._outgoing[u][v] = e
+        self._outgoing[v][u] = e_i
         self._incoming[v][u] = e
 
     def _print_edge(self, e):
@@ -298,6 +325,13 @@ class Graph:
             for v in self._outgoing[u]:
                 result += self._print_edge(self._outgoing[u][v]) + "\n"
         return result
+
+    def outgoing(self):
+        """
+        Return the dictionnary outgoing associated with the graph
+        :return:
+        """
+        return self._outgoing
 
 
 def graph_from_edgelist(E, directed=False):

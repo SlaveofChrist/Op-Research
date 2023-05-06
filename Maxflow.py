@@ -38,39 +38,75 @@ def edmondsKarpAlgorithm(initial_graph):
 	This is the link for seeing the pseudo-code : https://fr.wikipedia.org/wiki/Algorithme_d%27Edmonds-Karp
 	:param initial_graph:
 	:param residual_graph:
-	:return:
+	:return: max_flow
 	"""
-	s = initial_graph.get_vertex("s").value()
-	t = initial_graph.get_vertex("t").value()
-	initial_graph_edges = initial_graph.edges()
-	# residual_graph_edges = residual_graph.edges()
-	n_vertices = len(initial_graph.vertices())
-	capacities_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
-	flow_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
-	#residual_graph = {}
+	# s = initial_graph.get_vertex("s").value()
+	# t = initial_graph.get_vertex("t").value()
+	# initial_graph_edges = initial_graph.edges()
+	# # residual_graph_edges = residual_graph.edges()
+	# n_vertices = len(initial_graph.vertices())
+	# capacities_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
+	# flow_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
+	# #residual_graph = {}
+	#
+	# for e in initial_graph_edges:
+	# 	orig = e[0].value()
+	# 	dest = e[1].value()
+	# 	capacities_matrix[orig][dest] = e[2]
+	# 	# residual_graph[e[0]][e[1]] = e[2]
+	# 	flow_matrix[e[0].value()][e[1].value()] = 0
+	#
+	# f = 0
+	# while True:
+	# 	max_flow, parents_dict = bfs(s,t,capacities_matrix, flow_matrix)
+	# 	if max_flow == 0:
+	# 		break
+	# 	f += max_flow
+	# 	v = t
+	# 	while v != s:
+	# 		u = parents_dict[v]
+	# 		flow_matrix[u][v] += max_flow
+	# 		flow_matrix[v][u] -= max_flow
+	# 		v = u
+	# return f,flow_matrix
 
-	for e in initial_graph_edges:
-		orig = e[0].value()
-		dest = e[1].value()
-		capacities_matrix[orig][dest] = e[2]
-		# residual_graph[e[0]][e[1]] = e[2]
-		flow_matrix[e[0].value()][e[1].value()] = 0
-
-	f = 0
+	# Initialisation du flot à 0
+	max_flow = 0
+	source = initial_graph.get_vertex("s")
+	sink = initial_graph.get_vertex("t")
+	n = len(initial_graph.vertices())
+	# As long as there is an increasing path in the residual graph
 	while True:
-		max_flow, parents_dict = bfs(s,t,capacities_matrix, flow_matrix)
-		if max_flow == 0:
+		parent = [-1] * n
+		if not bfs(initial_graph, source, sink, parent):
 			break
-		f += max_flow
-		v = t
-		while v != s:
-			u = parents_dict[v]
-			flow_matrix[u][v] += max_flow
-			flow_matrix[v][u] -= max_flow
-			v = u
-	return f,flow_matrix
+		# Find the minimum residual capacity of the path increasing
+		path_flow = float("Inf")
+		s = sink
+		while s != source:
+			for e in initial_graph.incident_edges(parent[s.value()]):
+				if e.endpoints()[1] == s:
+					path_flow = min(path_flow, e.value() - e.flow())
+					break
+			s = parent[s.value()]
+		# Update of the flow and the residual graph
+		max_flow += path_flow
+		v = sink
+		while v != source:
+			u = parent[v.value()]
+			for e in initial_graph.incident_edges(u):
+				if e.endpoints()[1] == v:
+					e[4] += path_flow
+					break
 
-def bellmanFordAlgorithm(g, s, t ):
+			for e in initial_graph.incident_edges(v):
+				if e.endpoints()[1] == u:
+					e[4] -= path_flow
+					break
+			v = u
+	return max_flow
+
+def bellmanFordAlgorithm(g, source, sink ):
 	"""
 	This function aim to find the shortest path using Bellman-Ford algorithm
 	:param graph:
@@ -100,31 +136,46 @@ def bellmanFordAlgorithm(g, s, t ):
 	path.reverse()
 
 	return path, dist[t.value()]
-def bfs(s,t,capacities_matrix, flow_matrix):
-	s
-	n = len(capacities_matrix)
-	parents = [-1] * n
-	maximal_flow = [-1] * n
-	for v in range(n):
-		parents[v] = -1
-		maximal_flow[v] = float("inf")
+def bfs(g,source,sink,parent):
+	# s
+	# n = len(capacities_matrix)
+	# parents = [-1] * n
+	# maximal_flow = [-1] * n
+	# for v in range(n):
+	# 	parents[v] = -1
+	# 	maximal_flow[v] = float("inf")
+	#
+	# parents[s] = -2
+	#
+	# queue = deque([])
+	# queue.append(s)
+	#
+	# while len(queue):
+	# 	u = queue.popleft()
+	# 	for v in range(n):
+	# 		if capacities_matrix[u][v] - flow_matrix[u][v] > 0 and parents[v] == -1:
+	# 			parents[v] = u
+	# 			maximal_flow[v] = min(maximal_flow[u], capacities_matrix[u][v] - flow_matrix[u][v])
+	# 			if v != t:
+	# 				queue.append(v)
+	# 			else:
+	# 				return maximal_flow[t],parents
+	# return 0,parents
 
-	parents[s] = -2
-
-	queue = deque([])
-	queue.append(s)
-
-	while len(queue):
+	queue = deque()
+	queue.append(source)
+	visited = set()
+	visited.add(source)
+	while queue:
 		u = queue.popleft()
-		for v in range(n):
-			if capacities_matrix[u][v] - flow_matrix[u][v] > 0 and parents[v] == -1:
-				parents[v] = u
-				maximal_flow[v] = min(maximal_flow[u], capacities_matrix[u][v] - flow_matrix[u][v])
-				if v != t:
-					queue.append(v)
-				else:
-					return maximal_flow[t],parents
-	return 0,parents
+		for e in g.incident_edges(u):
+			if e.endpoints()[1] not in visited and e.value() > e.flow():
+				visited.add(e.endpoints()[1])
+				parent[e.endpoints()[1].value()] = u
+				if e.endpoints()[1] == sink:
+					return True
+				queue.append(e.endpoints()[1])
+	return False
 
 def visualizeAGraph(residual_graph):
 	color_edge_red = {'color': 'red'}
@@ -178,43 +229,44 @@ def parseInputFile():
 	return graphFromList(edges_list, True)
 
 def main():
-	 g_initial = parseInputFile()
-	 s = g_initial.get_vertex("s")
-	 t = g_initial.get_vertex("t")
-	 print(bellmanFordAlgorithm(g_initial,s,t))
+	g_initial = Graph(True)
+	# g_initial = parseInputFile()
+	# s = g_initial.get_vertex("s")
+	# t = g_initial.get_vertex("t")
+	# print(bellmanFordAlgorithm(g_initial,s,t))
 
-	# s = g_initial.insert_vertex("s", 0)
-	# b = g_initial.insert_vertex("b", 1)
-	# c = g_initial.insert_vertex("c", 2)
-	# d = g_initial.insert_vertex("d", 3)
-	# e = g_initial.insert_vertex("e", 4)
-	# f = g_initial.insert_vertex("f", 5)
-	# t = g_initial.insert_vertex("t", 6)
+	s = g_initial.insert_vertex("s", 0)
+	b = g_initial.insert_vertex("b", 1)
+	c = g_initial.insert_vertex("c", 2)
+	d = g_initial.insert_vertex("d", 3)
+	e = g_initial.insert_vertex("e", 4)
+	f = g_initial.insert_vertex("f", 5)
+	t = g_initial.insert_vertex("t", 6)
 	#
-	# g_initial.insert_edge(s, d, 3)
-	# g_initial.insert_edge(s, b, 3)
-	# g_initial.insert_edge(c, s, 3)
-	# g_initial.insert_edge(c,d, 1)
-	# g_initial.insert_edge(c, e, 2)
-	# g_initial.insert_edge(b, c, 4)
-	# g_initial.insert_edge(e, b, 1)
-	# g_initial.insert_edge(e, t, 1)
-	# g_initial.insert_edge(d, e, 2)
-	# g_initial.insert_edge(d, f, 6)
-	# g_initial.insert_edge(f, t, 9)
+	g_initial.insert_edge(s, d, 3)
+	g_initial.insert_edge(s, b, 3)
+	g_initial.insert_edge(c, s, 3)
+	g_initial.insert_edge(c,d, 1)
+	g_initial.insert_edge(c, e, 2)
+	g_initial.insert_edge(b, c, 4)
+	g_initial.insert_edge(e, b, 1)
+	g_initial.insert_edge(e, t, 1)
+	g_initial.insert_edge(d, e, 2)
+	g_initial.insert_edge(d, f, 6)
+	g_initial.insert_edge(f, t, 9)
 	# s = g_initial.insert_vertex('s',0)
 	# u = g_initial.insert_vertex('u',1)
 	# v = g_initial.insert_vertex('v',2)
 	# t = g_initial.insert_vertex('t',3)
-	#
+
 	# g_initial.insert_edge(s,u,4)
 	# g_initial.insert_edge(s,v,2)
 	# g_initial.insert_edge(u,v,3)
 	# g_initial.insert_edge(u,t,1)
 	# g_initial.insert_edge(v,t,6)
 
-	# flow,residual_graph = edmondsKarpAlgorithm(g_initial)
-
+	flow = edmondsKarpAlgorithm(g_initial)
+	print(flow)
 	# print(flow)
 
 
