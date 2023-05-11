@@ -1,4 +1,6 @@
+import pdb
 import random
+from itertools import filterfalse
 
 
 class Graph:
@@ -343,16 +345,25 @@ def graph_from_edgelist(E, directed=False):
 	"""
     g = Graph(directed)
     V = set()
+    n = len(V)
     for e in E:
         V.add(e[0])
         V.add(e[1])
 
     verts = {}
-    i = 0
+    result_source = filterfalse(lambda x: x != "s" and x != "0", V)
+    result_sink = filterfalse(lambda x: x!= "t" and x != str(n-1), V)
+    vertices_source = list(result_source)
+    vertices_sink = list(result_sink)
+    verts[vertices_source[0]] = g.insert_vertex(vertices_source[0],0)
+    verts[vertices_sink[0]] = g.insert_vertex(vertices_sink[0],n-1)
+
+    V.remove(vertices_source[0])
+    V.remove(vertices_sink[0])
+    i = 1
     for v in V:
         verts[v] = g.insert_vertex(v,i)
-        i += 1
-
+        i+=1
     for e in E:
         src = e[0]
         dest = e[1]

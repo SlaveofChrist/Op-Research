@@ -6,6 +6,7 @@ import sys
 import getopt
 import re
 import os
+import pdb
 
 def buildResidualGraphAndFlow(flow, G):
 	"""
@@ -119,23 +120,23 @@ def bellmanFordAlgorithm(g, source, sink ):
 	list_vertices = g.vertices()
 	n = len(list_vertices)
 	dist = [float('inf')] * n
-	dist[s.value()] = 0
+	dist[source.value()] = 0
 	parent = [-1] * n
 	for _ in range(n - 1):
 			for e in g.edges():
-				#pdb.set_trace()
 				if e.value() > 0 and dist[e.endpoints()[0].value()] + e.cost() < dist[e.endpoints()[1].value()]:
 					dist[e.endpoints()[1].value()] = dist[e.endpoints()[0].value()] + e.cost()
-					parent[e.endpoints()[1].value()] = e.endpoints()[0].value()
+					parent[e.endpoints()[1].value()] = e.endpoints()[0]
 
+	# pdb.set_trace()
 	path = []
-	u = t.value()
-	while u != -1:
+	u = sink
+	while u != source:
 		path.append(u)
-		u = parent[u]
+		u = parent[u.value()]
 	path.reverse()
 
-	return path, dist[t.value()]
+	return path, dist[sink.value()]
 def bfs(g,source,sink,parent):
 	# s
 	# n = len(capacities_matrix)
@@ -218,55 +219,54 @@ def parseInputFile():
 	use the algorithms which permit us to compute the maw flow with the minimal cost
 	"""
 	edges = recuperateFileFromInput()
-	pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\d+)<\/font>>\]'
+	pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\W{0,1}\d+)<\/font>>\]'
 	regex_compile = re.compile(pattern)
 	edges_list = []
 	for s in edges:
 		result = regex_compile.search(s)
 		if result:
 			edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
-
 	return graphFromList(edges_list, True)
 
 def main():
-	g_initial = Graph(True)
-	# g_initial = parseInputFile()
-	# s = g_initial.get_vertex("s")
-	# t = g_initial.get_vertex("t")
-	# print(bellmanFordAlgorithm(g_initial,s,t))
+	# g_initial = Graph(True)
+	g_initial = parseInputFile()
+	s = g_initial.get_vertex("s")
+	t = g_initial.get_vertex("t")
+	print(bellmanFordAlgorithm(g_initial,s,t))
 
-	s = g_initial.insert_vertex("s", 0)
-	b = g_initial.insert_vertex("b", 1)
-	c = g_initial.insert_vertex("c", 2)
-	d = g_initial.insert_vertex("d", 3)
-	e = g_initial.insert_vertex("e", 4)
-	f = g_initial.insert_vertex("f", 5)
-	t = g_initial.insert_vertex("t", 6)
-	#
-	g_initial.insert_edge(s, d, 3)
-	g_initial.insert_edge(s, b, 3)
-	g_initial.insert_edge(c, s, 3)
-	g_initial.insert_edge(c,d, 1)
-	g_initial.insert_edge(c, e, 2)
-	g_initial.insert_edge(b, c, 4)
-	g_initial.insert_edge(e, b, 1)
-	g_initial.insert_edge(e, t, 1)
-	g_initial.insert_edge(d, e, 2)
-	g_initial.insert_edge(d, f, 6)
-	g_initial.insert_edge(f, t, 9)
+	# s = g_initial.insert_vertex("s", 0)
+	# b = g_initial.insert_vertex("b", 1)
+	# c = g_initial.insert_vertex("c", 2)
+	# d = g_initial.insert_vertex("d", 3)
+	# e = g_initial.insert_vertex("e", 4)
+	# f = g_initial.insert_vertex("f", 5)
+	# t = g_initial.insert_vertex("t", 6)
+	# #
+	# g_initial.insert_edge(s, d, 3)
+	# g_initial.insert_edge(s, b, 3)
+	# g_initial.insert_edge(c, s, 3)
+	# g_initial.insert_edge(c,d, 1)
+	# g_initial.insert_edge(c, e, 2)
+	# g_initial.insert_edge(b, c, 4)
+	# g_initial.insert_edge(e, b, 1)
+	# g_initial.insert_edge(e, t, 1)
+	# g_initial.insert_edge(d, e, 2)
+	# g_initial.insert_edge(d, f, 6)
+	# g_initial.insert_edge(f, t, 9)
 	# s = g_initial.insert_vertex('s',0)
-	# u = g_initial.insert_vertex('u',1)
-	# v = g_initial.insert_vertex('v',2)
+	# v = g_initial.insert_vertex('v',1)
+	# u = g_initial.insert_vertex('u',2)
 	# t = g_initial.insert_vertex('t',3)
-
+	#
 	# g_initial.insert_edge(s,u,4)
 	# g_initial.insert_edge(s,v,2)
 	# g_initial.insert_edge(u,v,3)
 	# g_initial.insert_edge(u,t,1)
 	# g_initial.insert_edge(v,t,6)
 
-	flow = edmondsKarpAlgorithm(g_initial)
-	print(flow)
+	# flow = edmondsKarpAlgorithm(g_initial)
+	# print(flow)
 	# print(flow)
 
 

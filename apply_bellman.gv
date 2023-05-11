@@ -4,7 +4,7 @@ digraph Gv2{
               edge [arrowsize=0.6]
 
               s -> e [label = <<font color="green">40</font>,<font color="red">8</font>>]
-              s -> a [label = <<font color="green">15</font>,<font color="red">10</font>>]
+              e -> a [label = <<font color="green">15</font>,<font color="red">10</font>>]
               e -> d [label = <<font color="green">8</font>,<font color="red">1</font>>]
               d -> a [label = <<font color="green">5</font>,<font color="red">-4</font>>]
               d -> c [label = <<font color="green">20</font>,<font color="red">-1</font>>]
