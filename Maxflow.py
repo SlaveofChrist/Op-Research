@@ -228,6 +228,18 @@ def parseInputFile():
 			edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
 	return graphFromList(edges_list, True)
 
+def minCostMaxFlow():
+	flow = 0
+	cost = 0
+
+	while True:
+		path, path_cost = bellman_ford(g, source, sink)
+
+		if path_cost == float('inf'):
+			break
+
+
+
 def main():
 	# g_initial = Graph(True)
 	g_initial = parseInputFile()
