@@ -73,9 +73,9 @@ def edmondsKarpAlgorithm(initial_graph):
 
 	# Initialisation du flot à 0
 	max_flow = 0
-	source = initial_graph.get_vertex("s")
-	sink = initial_graph.get_vertex("t")
 	n = len(initial_graph.vertices())
+	source = initial_graph.get_vertex("0")
+	sink = initial_graph.get_vertex(str(n-1))
 	# As long as there is an increasing path in the residual graph
 	while True:
 		parent = [-1] * n
@@ -195,45 +195,82 @@ def recuperateFileFromInput():
 	 this function aim to recuperate the graphviz file from input and extract the edges from this file
 	 in the list form
 	"""
-	try:
-		opts, args = getopt.getopt(sys.argv[1:], "i", ["input"])
-	except getopt.GetoptError as err:
-		print(err)
-		print("Nom du programme <{-i | --input}> nom du fichier à lire ")
-		sys.exit(2)
-	if opts[0][0] == "-i":
-		with open(args[0],"r") as file_to_read:
-			input_to_parse = file_to_read.read()
+	# try:
+	# 	opts, args = getopt.getopt(sys.argv[1:], "i", ["input"])
+	# except getopt.GetoptError as err:
+	# 	print(err)
+	# 	print("Nom du programme <{-i | --input}> nom du fichier à lire ")
+	# 	sys.exit(2)
+	# if opts[0][0] == "-i":
+	with open('test.txt',"r") as file_to_read:
+		input_to_parse = file_to_read.read()
 
 		tab_to_parse = input_to_parse.split("\n")
 	edges = []
-	for i in range(5, len(tab_to_parse)):
-		if tab_to_parse[i] == "":
-			break
+	for i in range(1,len(tab_to_parse)):
 		edges.append(tab_to_parse[i].strip())
-	return edges
+	return edges,tab_to_parse[0].strip()
 
 def parseInputFile():
 	"""
 	This function parse the edges extracted to the structure of Graph Class oin the order to
 	use the algorithms which permit us to compute the maw flow with the minimal cost
 	"""
-	edges = recuperateFileFromInput()
-	pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\W{0,1}\d+)<\/font>>\]'
-	regex_compile = re.compile(pattern)
+	# edges = recuperateFileFromInput()
+	# pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\W{0,1}\d+)<\/font>>\]'
+	# regex_compile = re.compile(pattern)
+	# edges_list = []
+	# for s in edges:
+	# 	result = regex_compile.search(s)
+	# 	if result:
+	# 		edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
+	complement_informations = recuperateFileFromInput()[1].split()
+	edges = recuperateFileFromInput()[0]
 	edges_list = []
 	for s in edges:
-		result = regex_compile.search(s)
-		if result:
-			edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
-	return graphFromList(edges_list, True)
+		tab = s.split()
+		edges_list.append((tab[0], tab[1], int(tab[2]), int(tab[3])))
+	return graphFromList(detect_double_sens(edges_list,complement_informations), True)
+def detect_double_sens(E,complement_informations):
+	array_double_sens = []
+	for edge1 in E:
+		for edge2 in E:
+			if edge1 != edge2 and edge1[0] == edge2[1] and edge1[1] == edge2[0]:
+				array_double_sens.append(edge1)
 
+	if array_double_sens != []:
+		# array_double_sens = list(detect_if_double_sens)
+		tamp = []
+		# pdb.set_trace()
+		tamp.append((array_double_sens[0][0], array_double_sens[0][0]+ "_" + array_double_sens[0][1],
+					 array_double_sens[0][2], 0))
+		tamp.append((array_double_sens[0][0]+ "_" + array_double_sens[0][1], array_double_sens[0][1],
+					 array_double_sens[0][2], array_double_sens[0][3]))
+		for e in E:
+			if e == array_double_sens[0]:
+				E.remove(e)
+				E.append(tamp[0])
+				E.append(tamp[1])
+				break
+		for i in range(int(complement_informations[1])+1):
+			if E[i][1] == complement_informations[3]:
+				e = E[i]
+				sink_id = str(int(complement_informations[3])+1)
+				E[i] = (e[0],sink_id,e[2],e[3])
+		# for e in E:
+		# 	if e[1] == complement_informations[3]:
+		# 		E.remove(e)
+	return E
 def main():
 	# g_initial = Graph(True)
 	g_initial = parseInputFile()
-	s = g_initial.get_vertex("s")
-	t = g_initial.get_vertex("t")
-	print(bellmanFordAlgorithm(g_initial,s,t))
+	# s = g_initial.get_vertex("s")
+	# t = g_initial.get_vertex("t")
+	#print(g_initial)
+	print(edmondsKarpAlgorithm(g_initial))
+
+
+	# print(bellmanFordAlgorithm(g_initial,s,t))
 
 	# s = g_initial.insert_vertex("s", 0)
 	# b = g_initial.insert_vertex("b", 1)

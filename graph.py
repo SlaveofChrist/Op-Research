@@ -345,11 +345,11 @@ def graph_from_edgelist(E, directed=False):
 	"""
     g = Graph(directed)
     V = set()
-    n = len(V)
     for e in E:
         V.add(e[0])
         V.add(e[1])
-
+    # pdb.set_trace()
+    n = len(V)
     verts = {}
     result_source = filterfalse(lambda x: x != "s" and x != "0", V)
     result_sink = filterfalse(lambda x: x!= "t" and x != str(n-1), V)
@@ -357,9 +357,10 @@ def graph_from_edgelist(E, directed=False):
     vertices_sink = list(result_sink)
     verts[vertices_source[0]] = g.insert_vertex(vertices_source[0],0)
     verts[vertices_sink[0]] = g.insert_vertex(vertices_sink[0],n-1)
-
+    #
     V.remove(vertices_source[0])
     V.remove(vertices_sink[0])
+
     i = 1
     for v in V:
         verts[v] = g.insert_vertex(v,i)
@@ -369,6 +370,6 @@ def graph_from_edgelist(E, directed=False):
         dest = e[1]
         value = e[2]  if len(e) > 2 else None
         cost = e[3]
-        g.insert_edge(verts[src], verts[dest], value, cost)
 
+        g.insert_edge(verts[src], verts[dest], value, cost)
     return g
