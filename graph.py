@@ -123,12 +123,12 @@ class Graph:
             return hash((self._origin, self._destination))
 
         def __repr__(self):
-            return '({0},{1}){2},{3}'.format(self._origin, self._destination,
-                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "")
+            return '({0},{1}){4}/{2},{3}'.format(self._origin, self._destination,
+                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "", self._flow if self._flow is not None else "")
 
         def __str__(self):
-            return '({0},{1}){2},{3}'.format(self._origin, self._destination,
-                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "")
+            return '({0},{1}){4}/{2},{3}'.format(self._origin, self._destination,
+                                         self._value if self._value is not None else "", self._cost if self._cost is not None else "", self._flow if self._flow is not None else "")
 
         def __getitem__(self, index):
             """
@@ -336,7 +336,7 @@ class Graph:
         return self._outgoing
 
 
-def graph_from_edgelist(E, directed=False):
+def graph_from_edgelist(input, directed=False):
     """
   Make a graph instance based on a sequence of edge tuples.
   Edges can be either of from (origin,destination) or
@@ -345,31 +345,39 @@ def graph_from_edgelist(E, directed=False):
 	"""
     g = Graph(directed)
     V = set()
-    for e in E:
+    sink_id = input[1][3]
+    # for edge1 in E:
+    #     for edge2 in E:
+    #         if edge1 != edge2 and edge1[0] == edge2[1] and edge1[1] == edge2[0]:
+    #             E.remove(edge2)
+    for e in input[0]:
         V.add(e[0])
         V.add(e[1])
     # pdb.set_trace()
-    n = len(V)
+    # n = len(V)
     verts = {}
     result_source = filterfalse(lambda x: x != "s" and x != "0", V)
-    result_sink = filterfalse(lambda x: x!= "t" and x != str(n-1), V)
+    result_sink = filterfalse(lambda x: x!= "t" and x != sink_id, V)
     vertices_source = list(result_source)
     vertices_sink = list(result_sink)
     verts[vertices_source[0]] = g.insert_vertex(vertices_source[0],0)
-    verts[vertices_sink[0]] = g.insert_vertex(vertices_sink[0],n-1)
+    verts[vertices_sink[0]] = g.insert_vertex(vertices_sink[0],int(sink_id))
     #
     V.remove(vertices_source[0])
     V.remove(vertices_sink[0])
 
     i = 1
     for v in V:
+        if "_" in v:
+            verts[v] = g.insert_vertex(v,int(sink_id)+1)
+            continue
         verts[v] = g.insert_vertex(v,i)
         i+=1
-    for e in E:
+    for e in input[0]:
         src = e[0]
         dest = e[1]
         value = e[2]  if len(e) > 2 else None
         cost = e[3]
 
         g.insert_edge(verts[src], verts[dest], value, cost)
-    return g
+    return (g,verts[vertices_source[0]],verts[vertices_sink[0]])
