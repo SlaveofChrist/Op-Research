@@ -10,78 +10,23 @@ import pdb
 import networkx as nx
 from networkx.algorithms import minimum_cut
 
-def buildResidualGraphAndFlow(flow, G):
-	"""
-	This function creates Residual Graph and the graph on which the flow is applied.
-	:param flow: value of flow
-	:param G : initial Graph
-	:return: a residual graph and graph on which the flow is applied
-	"""
-	edges_initial = G.edges()
-
-	graph_flow = Graph(True)
-
-
-	for e in edges_initial:
-		u = graph_flow.insert_vertex(e[0].tag(), e[0].value())
-		v = graph_flow.insert_vertex(e[1].tag(), e[1].value())
-		graph_flow.insert_edge(u, v, flow)
-
-	residual_graph = Graph(True)
-	for e in edges_initial:
-		u = residual_graph.insert_vertex(e[0].tag(), e[0].value())
-		v = residual_graph.insert_vertex(e[1].tag(), e[1].value())
-		residual_graph.insert_edge(u, v, e[2]-flow)
-
-	return graph_flow, residual_graph
 
 def edmondsKarpAlgorithm(initial_graph,source,sink):
 	"""
 	This is the implementation of edmondsKaroAlgorithm.
-	This is the link for seeing the pseudo-code : https://fr.wikipedia.org/wiki/Algorithme_d%27Edmonds-Karp
-	:param initial_graph:
-	:param residual_graph:
-	:return: max_flow
+	:param initial_graph
+	:param source
+	:param sink
+	:return: max_flow,graph_modified and list of flow
 	"""
-	# s = initial_graph.get_vertex("s").value()
-	# t = initial_graph.get_vertex("t").value()
-	# initial_graph_edges = initial_graph.edges()
-	# # residual_graph_edges = residual_graph.edges()
-	# n_vertices = len(initial_graph.vertices())
-	# capacities_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
-	# flow_matrix = [[0 for _ in range(n_vertices)]for _ in range(n_vertices)]
-	# #residual_graph = {}
-	#
-	# for e in initial_graph_edges:
-	# 	orig = e[0].value()
-	# 	dest = e[1].value()
-	# 	capacities_matrix[orig][dest] = e[2]
-	# 	# residual_graph[e[0]][e[1]] = e[2]
-	# 	flow_matrix[e[0].value()][e[1].value()] = 0
-	#
-	# f = 0
-	# while True:
-	# 	max_flow, parents_dict = bfs(s,t,capacities_matrix, flow_matrix)
-	# 	if max_flow == 0:
-	# 		break
-	# 	f += max_flow
-	# 	v = t
-	# 	while v != s:
-	# 		u = parents_dict[v]
-	# 		flow_matrix[u][v] += max_flow
-	# 		flow_matrix[v][u] -= max_flow
-	# 		v = u
-	# return f,flow_matrix
 
-	# Initialisation du flot à 0
+	# Flow initialization to 0
 	max_flow = 0
 	n = len(initial_graph.vertices())
 	flow_list = {}
 	for e in initial_graph.edges():
-		if e[2] > 0:
-			flow_list[e] = [0]
-	# source = initial_graph.get_vertex("0")
-	# sink = initial_graph.get_vertex(str(n-1))
+		flow_list[e] = [0]
+
 	# As long as there is an increasing path in the residual graph
 	while True:
 		parent = [-1] * n
@@ -118,13 +63,12 @@ def edmondsKarpAlgorithm(initial_graph,source,sink):
 def bellmanFordAlgorithm(g, source, sink ):
 	"""
 	This function aim to find the shortest path using Bellman-Ford algorithm
-	:param graph:
-	:param s:
-	:param t:
-	:return: path : the shortest path
-	:return: dist[i] : the final distance of every node from s
+	:param g: graph initial
+	:param source:
+	:param sink:
+	:return: parent : the list of parents of vertices
+	:return: dist[sink] : the final distance of sink
 	"""
-
 	list_vertices = g.vertices()
 	n = len(list_vertices)
 	dist = [float('inf')] * n
@@ -132,44 +76,20 @@ def bellmanFordAlgorithm(g, source, sink ):
 	parent = [-1] * n
 	for _ in range(n - 1):
 			for e in g.edges():
-				if e.value() > 0 and dist[e.endpoints()[0].value()] + e.cost() < dist[e.endpoints()[1].value()]:
+				if e.value() > e.flow() and dist[e.endpoints()[0].value()] + e.cost() < dist[e.endpoints()[1].value()]:
 					dist[e.endpoints()[1].value()] = dist[e.endpoints()[0].value()] + e.cost()
 					parent[e.endpoints()[1].value()] = e.endpoints()[0]
 
-	# pdb.set_trace()
-	path = []
-	u = sink
-	while u != source:
-		path.append(u)
-		u = parent[u.value()]
-	path.reverse()
-
-	return path, dist[sink.value()]
+	return parent, dist[sink.value()]
 def bfs(g,source,sink,parent):
-	# s
-	# n = len(capacities_matrix)
-	# parents = [-1] * n
-	# maximal_flow = [-1] * n
-	# for v in range(n):
-	# 	parents[v] = -1
-	# 	maximal_flow[v] = float("inf")
-	#
-	# parents[s] = -2
-	#
-	# queue = deque([])
-	# queue.append(s)
-	#
-	# while len(queue):
-	# 	u = queue.popleft()
-	# 	for v in range(n):
-	# 		if capacities_matrix[u][v] - flow_matrix[u][v] > 0 and parents[v] == -1:
-	# 			parents[v] = u
-	# 			maximal_flow[v] = min(maximal_flow[u], capacities_matrix[u][v] - flow_matrix[u][v])
-	# 			if v != t:
-	# 				queue.append(v)
-	# 			else:
-	# 				return maximal_flow[t],parents
-	# return 0,parents
+	"""
+
+	:param g:
+	:param source:
+	:param sink:
+	:param parent:
+	:return: True if the sink is reached False if it is not
+	"""
 
 	queue = deque()
 	queue.append(source)
@@ -187,6 +107,14 @@ def bfs(g,source,sink,parent):
 	return False
 
 def bfs_cut_min(g, source, visited):
+	"""
+	this function specifies in the visited array whether the vertex is visited or not
+	We use this function to compute the cut min
+	:param g:
+	:param source:
+	:param visited:
+	:return:
+	"""
 	queue = deque()
 	queue.append(source)
 	visited[source.value()] = True
@@ -196,71 +124,122 @@ def bfs_cut_min(g, source, visited):
 			if  not visited[e.endpoints()[1].value()] and e.value() > e.flow():
 				visited[e.endpoints()[1].value()] = True
 				queue.append(e.endpoints()[1])
-def min_cut(g):
-	source = g.get_vertex("0")
+def min_cut(g,source):
+	"""
+	this function compute the cut min of some graph
+	:param g:
+	:param source:
+	:return: visited edges and unvisited edges
+	"""
 	n = len(g.vertices())
 	visited = [False] * n
 	bfs_cut_min(g, source, visited)
 	min_cut_edges = []
+	visited_edges = set()
+	unvisited_edges = set()
+
 	for u in g.vertices():
-		for e in g.incident_edges(u):
-			if visited[u.value()] and not visited[e.endpoints()[1].value()]:
-				min_cut_edges.append((u.tag(),e.endpoints()[1].tag()))
-	return min_cut_edges
-def visualizeAGraph(residual_graph):
+		if visited[u.value()]:
+			visited_edges.add(u)
+		if not visited[u.value()]:
+			unvisited_edges.add(u)
+	return visited_edges,unvisited_edges
+def visualizeAGraph(residual_graph,file_name,ind_name):
+	"""
+	this
+	:param residual_graph:
+	:param file_name: file_name of the image file
+	:param ind_name: name that differentiates files resulting from a specific algorithm
+	:return: void
+	"""
 	color_edge_red = {'color': 'red'}
 	graph = graphviz.Digraph()
-	for key in residual_graph.keys():
-		graph.node(key.tag())
-	for key,val in residual_graph.items():
-		for key1,val2 in val.items():
-			if val2 > 0:
-				graph.edge(key.tag(),key1.tag(),str(val2))
-			else:
-				graph.edge(key.tag(), key1.tag(), str(val2),**color_edge_red)
-	graph.render()
-def recuperateFileFromInput():
-	"""
-	 this function aim to recuperate the graphviz file from input and extract the edges from this file
-	 in the list form
-	"""
-	# try:
-	# 	opts, args = getopt.getopt(sys.argv[1:], "i", ["input"])
-	# except getopt.GetoptError as err:
-	# 	print(err)
-	# 	print("Nom du programme <{-i | --input}> nom du fichier à lire ")
-	# 	sys.exit(2)
-	# if opts[0][0] == "-i":
-	with open('test.txt',"r") as file_to_read:
-		input_to_parse = file_to_read.read()
+	for e in residual_graph.edges():
+		if e[2] > 0:
+			graph.node(e[0].tag())
+			graph.node(e[1].tag())
+			graph.edge(e[0].tag(),e[1].tag(),str(e[4])+"/"+str(e[2])+"/"+str(e[3]))
+	output_directory = "out"
+	file_name = file_name.split(".")[0]
 
-		tab_to_parse = input_to_parse.split("\n")
-	edges = []
-	for i in range(1,len(tab_to_parse)):
-		edges.append(tab_to_parse[i].strip())
-	return edges,tab_to_parse[0].strip()
+	graph.render(filename=file_name+"_"+ind_name, directory=output_directory, format="pdf")
 
-def parseInputFile():
+def execute():
 	"""
-	This function parse the edges extracted to the structure of Graph Class oin the order to
-	use the algorithms which permit us to compute the maw flow with the minimal cost
+	 The purpose of this function is to execute
+	 the appropriate algorithm according to the argument on the standard input.
 	"""
-	# edges = recuperateFileFromInput()
-	# pattern = r'^\s*(\w+) -> (\w+) \[label = <<font color=\"\w+\">(\d+)<\/font>,<font color=\"\w+\">(\W{0,1}\d+)<\/font>>\]'
-	# regex_compile = re.compile(pattern)
-	# edges_list = []
-	# for s in edges:
-	# 	result = regex_compile.search(s)
-	# 	if result:
-	# 		edges_list.append((result.group(1), result.group(2), int(result.group(3)), int(result.group(4))))
-	complement_informations = recuperateFileFromInput()[1].split()
-	edges = recuperateFileFromInput()[0]
+	try:
+		opts, args = getopt.getopt(sys.argv[1:], "mfM", ["mincut","maxflow","mincostmaxflow"])
+	except getopt.GetoptError as err:
+		print(err)
+		print("Nom du programme <{-i | --input}> nom du fichier à lire ")
+		sys.exit(2)
+	g, source, sink = 0,0,0
+	for o,a in opts:
+		#pdb.set_trace()
+		if o in ("-m", "--mincut"):
+			edges = []
+			with open(args[0],"r") as file_to_read:
+				input_to_parse = file_to_read.read() ## splitlines
+			tab_to_parse = input_to_parse.splitlines()
+			for i in range(1, len(tab_to_parse)):
+				edges.append(tab_to_parse[i].strip())
+			g, source, sink = parseInputFile((edges, tab_to_parse[0].strip()))
+			max_flow, gr, flow_list = edmondsKarpAlgorithm(g, source, sink)
+			part1, part2 = min_cut(gr, source)
+			print_arcs_min_cut(gr.edges(), part1, part2)
+
+
+		elif o in ("-f", "--maxflow"):
+			edges = []
+			with open(args[0], "r") as file_to_read:
+				input_to_parse = file_to_read.read()  ## splitlines
+			tab_to_parse = input_to_parse.splitlines()
+			for i in range(1, len(tab_to_parse)):
+				edges.append(tab_to_parse[i].strip())
+			g, source, sink = parseInputFile((edges, tab_to_parse[0].strip()))
+
+			max_flow, gr, flow_list = edmondsKarpAlgorithm(g, source, sink)
+			print(max_flow)
+			print_flow_list(flow_list)
+
+		elif o in ("-M", "--mincostmaxflow"):
+			edges = []
+			with open(args[0], "r") as file_to_read:
+				input_to_parse = file_to_read.read()  ## splitlines
+			tab_to_parse = input_to_parse.splitlines()
+			for i in range(1, len(tab_to_parse)):
+				edges.append(tab_to_parse[i].strip())
+			g, source, sink = parseInputFile((edges, tab_to_parse[0].strip()))
+
+			flow, cost, flow_list, gr = minCostMaxFlow(g, source, sink)
+			print("flow : {}; cost = {}".format(flow, cost))
+			print_flow_list(flow_list)
+
+
+
+def parseInputFile(file_input):
+	"""
+	The purpose of this function is to parse the file supplied to stdin
+	:param file_input: tuple of
+	:return the graph
+	"""
+
+	complement_informations = file_input[1].split()
+	edges = file_input[0]
 	edges_list = []
 	for s in edges:
 		tab = s.split()
 		edges_list.append((tab[0], tab[1], int(tab[2]), int(tab[3])))
 	return graphFromList(detect_double_sens(edges_list,complement_informations), True)
 def detect_double_sens(E,complement_informations):
+	"""
+
+	:param E: array of tuple of edges
+	:param complement_informations:
+	:return: E,complement_informations
+	"""
 	array_double_sens = []
 	for edge1 in E:
 		for edge2 in E:
@@ -268,125 +247,87 @@ def detect_double_sens(E,complement_informations):
 				array_double_sens.append(edge1)
 
 	if array_double_sens != []:
-		# array_double_sens = list(detect_if_double_sens)
 		tamp = []
-		# pdb.set_trace()
-		tamp.append((array_double_sens[0][0], array_double_sens[0][0]+ "_" + array_double_sens[0][1],
-					 array_double_sens[0][2], 0))
-		tamp.append((array_double_sens[0][0]+ "_" + array_double_sens[0][1], array_double_sens[0][1],
-					 array_double_sens[0][2], array_double_sens[0][3]))
+		tamp.append((array_double_sens[1][0], array_double_sens[1][1]+ "_" + array_double_sens[1][0],
+					 array_double_sens[1][2], array_double_sens[1][3]))
+		tamp.append((array_double_sens[1][1]+ "_" + array_double_sens[1][0], array_double_sens[1][1],
+					 array_double_sens[1][2], 0))
 		for e in E:
-			if e == array_double_sens[0]:
+			if e == array_double_sens[1]:
 				E.remove(e)
 				E.append(tamp[0])
 				E.append(tamp[1])
 				break
-		# for i in range(int(complement_informations[1])+1):
-		# 	if E[i][1] == complement_informations[3]:
-		# 		e = E[i]
-		# 		sink_id = str(int(complement_informations[3])+1)
-		# 		E[i] = (e[0],sink_id,e[2],e[3])
-		# for e in E:
-		# 	if e[1] == complement_informations[3]:
-		# 		E.remove(e)
 	return E,complement_informations
 
 
-def minCostMaxFlow():
+def minCostMaxFlow(g,source,sink):
+	"""
+	this function aim to compute the flow max with the min cost
+	:param g:
+	:param source:
+	:param sink:
+	:return: flow : the max_flow, cost, list of flows and the graph modified
+	"""
 	flow = 0
 	cost = 0
+	flow_list = {}
+	for e in g.edges():
+		flow_list[e] = [0]
 
 	while True:
-		path, path_cost = bellman_ford(g, source, sink)
+		parent, path_cost = bellmanFordAlgorithm(g, source, sink)
 
 		if path_cost == float('inf'):
 			break
+		s = sink
+		path_flow = float('inf')
+		while s != source:
+			for e in g.incident_edges(parent[s.value()]):
+				if e.endpoints()[1] == s:
+					path_flow = min(path_flow, e.value() - e.flow())
+					break
+			s = parent[s.value()]
+
+		v = sink
+		while v != source:
+			u = parent[v.value()]
+			for e in g.incident_edges(u):
+				if e.endpoints()[1] == v:
+					e[4] += path_flow
+					flow_list[e].append(path_flow)
+					break
+
+			for e in g.incident_edges(v):
+				if e.endpoints()[1] == u:
+					e[4] -= path_flow
+					break
+			v = u
+
+		flow += path_flow
+		cost += path_cost * path_flow
+
+
+	return flow,cost,flow_list,g
 def print_flow_list(flow_list):
 	print("Liste de valeurs parcourant chaque arc\n[\n")
 	for key,value in flow_list.items():
-		print("{} : {}\n".format(key,value))
+		if key[2] > 0:
+			print("{} : {}\n".format(key,value))
 	print("]")
+
+def print_arcs_min_cut(edges, part1, part2):
+	edges_tuple = []
+	for e in edges:
+		if e[2] > 0:
+			edges_tuple.append((e.endpoints()[0],e.endpoints()[1]))
+
+	cut_edges = [(u, v) for u, v in edges_tuple if u in part1 and v in part2]
+	print("Arêtes de la coupe minimale:")
+	for u, v in cut_edges:
+		print(f"{u} -> {v}")
 def main():
-	# g_initial = Graph(True)
-	# s = g_initial.get_vertex("s")
-	# t = g_initial.get_vertex("t")
-	#print(g_initial)
-	g_initial,source,sink = parseInputFile()
-	max_flow, gr,flow_list = edmondsKarpAlgorithm(g_initial,source,sink)
-	print(max_flow)
-	print_flow_list(flow_list)
-	print(min_cut(gr))
-	# G = nx.DiGraph()
-	# G.add_node(0)
-	# G.add_node(1)
-	# G.add_node(2)
-	# G.add_node(3)
-	# G.add_node(4)
-	# G.add_node(5)
-	# G.add_node(6)
-	#
-	# G.add_edge(0,1, capacity=16)
-	# G.add_edge(0,3, capacity=13)
-	# G.add_edge(1,2, capacity=5)
-	# G.add_edge(1,4, capacity=10)
-	# G.add_edge(2,3, capacity=5)
-	# G.add_edge(2,4, capacity=8)
-	# G.add_edge(3,2, capacity=10)
-	# G.add_edge(3,5, capacity=15)
-	# G.add_edge(4,6, capacity=25)
-	# G.add_edge(5,6, capacity=6)
-	#
-	# cut_value,partition = minimum_cut(G,0,6)
-	# print(cut_value)
-	# print(partition[0])
-	# print(partition[1])
-
-
-
-
-	# print(bellmanFordAlgorithm(g_initial,s,t))
-
-	# s = g_initial.insert_vertex("s", 0)
-	# b = g_initial.insert_vertex("b", 1)
-	# c = g_initial.insert_vertex("c", 2)
-	# d = g_initial.insert_vertex("d", 3)
-	# e = g_initial.insert_vertex("e", 4)
-	# f = g_initial.insert_vertex("f", 5)
-	# t = g_initial.insert_vertex("t", 6)
-	# #
-	# g_initial.insert_edge(s, d, 3)
-	# g_initial.insert_edge(s, b, 3)
-	# g_initial.insert_edge(c, s, 3)
-	# g_initial.insert_edge(c,d, 1)
-	# g_initial.insert_edge(c, e, 2)
-	# g_initial.insert_edge(b, c, 4)
-	# g_initial.insert_edge(e, b, 1)
-	# g_initial.insert_edge(e, t, 1)
-	# g_initial.insert_edge(d, e, 2)
-	# g_initial.insert_edge(d, f, 6)
-	# g_initial.insert_edge(f, t, 9)
-	# s = g_initial.insert_vertex('s',0)
-	# v = g_initial.insert_vertex('v',1)
-	# u = g_initial.insert_vertex('u',2)
-	# t = g_initial.insert_vertex('t',3)
-	#
-	# g_initial.insert_edge(s,u,4)
-	# g_initial.insert_edge(s,v,2)
-	# g_initial.insert_edge(u,v,3)
-	# g_initial.insert_edge(u,t,1)
-	# g_initial.insert_edge(v,t,6)
-
-	# flow = edmondsKarpAlgorithm(g_initial)
-	# print(flow)
-	# print(flow)
-
-
-
-
-	#visualizeAGraph(residual_graph)
-
-    # g_flow, residual_g = buildResidualGraphAndFlow(0, g_initial)
-
+	execute()
 
 if __name__ == "__main__":
     main()

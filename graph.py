@@ -5,6 +5,7 @@ from itertools import filterfalse
 
 class Graph:
     """
+    @author: Mr Christophe PAPAZIAN
   Representation of a simple graph using an adjacency map.
   This class handles { undirected, directed } x { unweighted, weighted } graphs.
   Vertices can have a weight as in Dijkstra algorithm
@@ -312,14 +313,14 @@ class Graph:
         if self.get_edge(u, v) is not None:
             raise ValueError('u and v are already adjacent')
         e = self.Edge(u, v, x, cost)
-        e_i = self.Edge(v,u,0,cost)
+        e_i = self.Edge(v,u,0,-cost)
         self._outgoing[u][v] = e
         self._outgoing[v][u] = e_i
         self._incoming[v][u] = e
 
     def _print_edge(self, e):
-        return '{0} -{2},{4}-{3} {1}'.format(e._origin, e._destination, e._value if e._value is not None else "",
-                                         ">" if self.is_directed() else "", e._cost if e._cost is not None else "" )
+        return '{0} - {5}/{2},{4}-{3} {1}'.format(e._origin, e._destination, e._value if e._value is not None else "",
+                                         ">" if self.is_directed() else "", e._cost if e._cost is not None else "", e._flow  )
 
     def __str__(self):
         result = ""
@@ -345,22 +346,21 @@ def graph_from_edgelist(input, directed=False):
 	"""
     g = Graph(directed)
     V = set()
+    source_id = input[1][2]
     sink_id = input[1][3]
-    # for edge1 in E:
-    #     for edge2 in E:
-    #         if edge1 != edge2 and edge1[0] == edge2[1] and edge1[1] == edge2[0]:
-    #             E.remove(edge2)
+
     for e in input[0]:
         V.add(e[0])
         V.add(e[1])
-    # pdb.set_trace()
-    # n = len(V)
+
     verts = {}
-    result_source = filterfalse(lambda x: x != "s" and x != "0", V)
+    result_source = filterfalse(lambda x: x != "s" and x != source_id, V)
     result_sink = filterfalse(lambda x: x!= "t" and x != sink_id, V)
     vertices_source = list(result_source)
     vertices_sink = list(result_sink)
     verts[vertices_source[0]] = g.insert_vertex(vertices_source[0],0)
+    if int(sink_id) >= int(input[1][0]):
+        sink_id = int(input[1][0]) - 1
     verts[vertices_sink[0]] = g.insert_vertex(vertices_sink[0],int(sink_id))
     #
     V.remove(vertices_source[0])

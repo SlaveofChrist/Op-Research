@@ -1,0 +1,26 @@
+Pour exécuter notre programme, il suffit de procéder comme suit :
+
+Exécuter le max_flot :
+    python Maxflow.py -f <chemin du fichier> pour le flot maximal
+    la sortie se présentera comme suit :
+    flot max = <valeur>
+    Liste valeurs parcourant chaque arc
+    [
+    (origine,destination)flot/capacité : liste de flots
+    ]
+Exécuter la min_cut :
+    python Maxflow.py -m <chemin du fichier>
+    Arêtes de la coupe minimale :
+    origine -> destination
+
+
+
+Exécuter le min cost avec le flot maximal :
+    python Maxflow.py -M <chemin du fichier>
+    flow : <valeur>; cost = <valeur>
+    Liste valeurs parcourant chaque arc
+    [
+    (origine,destination)flot/capacité : liste de flots
+    ]
+
+Lien github :
